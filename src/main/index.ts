@@ -268,6 +268,16 @@ function buildTrayMenu(): Menu {
       }))
     },
     { type: 'separator' },
+    {
+      label: 'Abrir al iniciar el computador',
+      type: 'checkbox' as const,
+      checked: app.getLoginItemSettings().openAtLogin,
+      click: (item) => {
+        app.setLoginItemSettings({ openAtLogin: item.checked })
+        tray?.setContextMenu(buildTrayMenu())
+      }
+    },
+    { type: 'separator' },
     { label: 'Salir', click: () => app.quit() }
   ])
 }
