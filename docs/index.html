@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pausas Activas — Cuida tu cuerpo mientras trabajas</title>
+  <meta name="description" content="App gratuita para Mac y Windows. Te recuerda pausas activas con ejercicios guiados para que tu cuerpo no pague el precio de largas jornadas frente al computador." />
+  <style>
+    :root {
+      --blue: #63b3ed;
+      --blue-light: #bee3f8;
+      --bg: #0a0e1a;
+      --bg2: #111827;
+      --border: rgba(255,255,255,0.07);
+      --text: rgba(255,255,255,0.85);
+      --muted: rgba(255,255,255,0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ── */
+    .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Nav ── */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 18px 0;
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--blue);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .nav-links { display: flex; gap: 24px; font-size: 14px; color: var(--muted); }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 96px 0 72px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(99, 179, 237, 0.1);
+      border: 1px solid rgba(99, 179, 237, 0.2);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.4px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    h1 span { color: var(--blue); }
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+
+    /* ── Download buttons ── */
+    .downloads {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .btn-download {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 22px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-download:hover { opacity: 0.85; transform: translateY(-1px); text-decoration: none; }
+    .btn-download:active { transform: scale(0.98); }
+    .btn-mac {
+      background: #fff;
+      color: #000;
+    }
+    .btn-win {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-download svg { flex-shrink: 0; }
+    .btn-meta { display: flex; flex-direction: column; text-align: left; }
+    .btn-meta small { font-size: 11px; opacity: 0.55; font-weight: 400; }
+    .download-note {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── Preview mockup ── */
+    .preview {
+      margin: 64px 0;
+      position: relative;
+    }
+    .preview-window {
+      background: rgba(8, 10, 20, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+    .preview-bar {
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .window-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .preview-body {
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+    }
+    .preview-title { font-size: 28px; font-weight: 700; color: #fff; }
+    .preview-sub { font-size: 14px; color: var(--muted); }
+
+    /* SVG animado en preview */
+    .preview-svg-wrapper {
+      width: 100px; height: 100px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .breathe-ring {
+      transform-origin: 50px 50px;
+      animation: breathe 4s ease-in-out infinite;
+    }
+    .breathe-ring:nth-child(2) { animation-delay: 0.3s; }
+    .breathe-ring:nth-child(3) { animation-delay: 0.6s; }
+    @keyframes breathe {
+      0%, 100% { r: 14px; opacity: 0.2; }
+      50% { r: 24px; opacity: 0.55; }
+    }
+    .preview-timer {
+      font-size: 22px; font-weight: 700; color: var(--blue-light);
+      letter-spacing: 2px; font-variant-numeric: tabular-nums;
+    }
+    .preview-progress-bar {
+      width: 100%; height: 3px;
+      background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;
+    }
+    .preview-progress-fill {
+      height: 100%; width: 35%;
+      background: linear-gradient(90deg, #4299e1, #90cdf4);
+      border-radius: 2px;
+      animation: progress 8s ease-in-out infinite alternate;
+    }
+    @keyframes progress { to { width: 80%; } }
+    .preview-btns { display: flex; gap: 10px; }
+    .preview-btn {
+      padding: 8px 16px; border-radius: 9px; font-size: 13px;
+    }
+    .preview-btn-a {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .preview-btn-b {
+      background: transparent;
+      color: rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── Features ── */
+    .features { padding: 16px 0 80px; }
+    .features h2 {
+      font-size: 28px; font-weight: 700; color: #fff;
+      letter-spacing: -0.5px; margin-bottom: 32px; text-align: center;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+    }
+    .feature-icon { font-size: 24px; margin-bottom: 12px; }
+    .feature-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.55; }
+
+    /* ── How it works ── */
+    .how { padding: 0 0 80px; text-align: center; }
+    .how h2 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 36px; }
+    .steps {
+      display: flex;
+      gap: 0;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .step {
+      flex: 1; min-width: 160px; max-width: 200px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 8px;
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(99, 179, 237, 0.12);
+      border: 1px solid rgba(99, 179, 237, 0.25);
+      color: var(--blue);
+      font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-text { font-size: 14px; color: var(--muted); text-align: center; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="nav-logo">
+      <div class="dot"></div>
+      Pausas Activas
+    </div>
+    <div class="nav-links">
+      <a href="https://github.com/hnpz22/pausas-activas/releases">Descargas</a>
+      <a href="https://github.com/hnpz22/pausas-activas">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="badge">Gratis · Mac y Windows · Sin instalación de dependencias</div>
+      <h1>Tu cuerpo también<br><span>merece descanso</span></h1>
+      <p class="hero-sub">
+        Pausas Activas vive en tu barra de menú y te recuerda
+        tomar pausas con ejercicios guiados antes de que el cuerpo lo reclame.
+      </p>
+
+      <div class="downloads">
+        <a class="btn-download btn-mac"
+           href="https://github.com/hnpz22/pausas-activas/releases/latest/download/Pausas-Activas-universal.dmg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+          <div class="btn-meta">
+            <span>Descargar para Mac</span>
+            <small>Universal · M1 / Intel</small>
+          </div>
+        </a>
+
+        <a class="btn-download btn-win"
+           href="https://github.com/hnpz22/pausas-activas/releases/latest/download/Pausas-Activas-win-x64.exe">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 5.557L9.938 4.6v6.744H3zm0 12.886l6.938.956V12.68H3zm7.607 1.072L21 21V12.68h-10.393zm0-15.03V11.32H21V3z"/>
+          </svg>
+          <div class="btn-meta">
+            <span>Descargar para Windows</span>
+            <small>x64 · Windows 10 / 11</small>
+          </div>
+        </a>
+      </div>
+
+      <p class="download-note">
+        Sin suscripción · Sin cuenta · Sin internet para funcionar
+      </p>
+    </section>
+
+    <!-- Preview -->
+    <div class="preview">
+      <div class="preview-window">
+        <div class="preview-bar">
+          <div class="window-dot" style="background:#ff5f56"></div>
+          <div class="window-dot" style="background:#ffbd2e"></div>
+          <div class="window-dot" style="background:#27c93f"></div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-title">Pausa Activa</div>
+          <div class="preview-sub">25 minutos de trabajo — tu cuerpo necesita esto</div>
+          <div class="preview-svg-wrapper">
+            <svg viewBox="0 0 100 100" width="100" height="100" fill="none">
+              <circle class="breathe-ring" cx="50" cy="50" stroke="#63b3ed" stroke-width="1.5"/>
+              <circle class="breathe-ring" cx="50" cy="50" stroke="#63b3ed" stroke-width="2"/>
+              <circle class="breathe-ring" cx="50" cy="50" stroke="#63b3ed" stroke-width="2.5" r="12"/>
+            </svg>
+          </div>
+          <div class="preview-timer">4:30</div>
+          <div class="preview-progress-bar">
+            <div class="preview-progress-fill"></div>
+          </div>
+          <div class="preview-btns">
+            <div class="preview-btn preview-btn-a">Posponer 3 min</div>
+            <div class="preview-btn preview-btn-b">Saltar pausa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <section class="features">
+      <h2>Todo lo que necesitas</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <div class="feature-title">Corre local</div>
+          <div class="feature-desc">No necesita internet. No hay servidor. No hay suscripción. Todo en tu computador.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⏰</div>
+          <div class="feature-title">Avisos previos</div>
+          <div class="feature-desc">Te notifica 5, 2 y 1 minuto antes — nunca te corta el flujo sin avisar.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤸</div>
+          <div class="feature-title">6 ejercicios guiados</div>
+          <div class="feature-desc">Cuello, ojos, hombros, muñecas, espalda y respiración — animados en pantalla.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔋</div>
+          <div class="feature-title">Ultra liviana</div>
+          <div class="feature-desc">Funciona en computadores con i3 y 8GB RAM sin interferir con tu trabajo.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <div class="feature-title">Configurable</div>
+          <div class="feature-desc">Ajusta el intervalo de trabajo (15–50 min) y la duración de la pausa desde el tray.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <div class="feature-title">Se actualiza solo</div>
+          <div class="feature-desc">Cuando hay una nueva versión, la descarga en segundo plano y te pregunta si instalar.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how">
+      <h2>Cómo funciona</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">Descargas e instalas. Nada más.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">La app vive en tu barra de menú, contando el tiempo activo.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">A los 25 min, te avisa — primero suave, luego el overlay.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">Haces el ejercicio del día. 5 minutos. Vuelves fresco.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    Hecho con Electron · Gratis y open source ·
+    <a href="https://github.com/hnpz22/pausas-activas">Ver el código en GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+name: Release
+
+# Se activa cuando haces: git tag v1.0.0 && git push --tags
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # ── Build para macOS (universal: arm64 + Intel) ───────────────────────────
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build Mac universal
+        run: npm run dist:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Sin certificado de Apple por ahora — los usuarios tienen que
+          # hacer clic derecho → Abrir la primera vez. Para firmar, se necesita
+          # el Apple Developer Program ($99/año) y configurar los secrets.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload .dmg to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.dmg
+          generate_release_notes: true
+
+  # ── Build para Windows (x64: cubre i3, i5, Ryzen, etc.) ──────────────────
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build Windows x64
+        run: npm run dist:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload .exe to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
