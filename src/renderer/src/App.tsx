@@ -2,10 +2,20 @@ import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EXERCISES } from './exercises'
 
+interface BreakStartData {
+  breakSeconds: number
+  workMinutes: number
+  snoozeMinutes: number
+  mode: 'health' | 'pomodoro'
+  isLongBreak: boolean
+  cycle: number
+  cyclesBeforeLongBreak: number
+}
+
 declare global {
   interface Window {
     breakAPI: {
-      onBreakStart: (cb: (data: { breakSeconds: number; workMinutes: number }) => void) => void
+      onBreakStart: (cb: (data: BreakStartData) => void) => void
       complete: () => void
       skip: () => void
       snooze: () => void
@@ -29,6 +39,11 @@ export default function App(): JSX.Element {
   const [breakSeconds, setBreakSeconds] = useState(0)
   const [remaining, setRemaining] = useState(0)
   const [workMinutes, setWorkMinutes] = useState(25)
+  const [snoozeMinutes, setSnoozeMinutes] = useState(3)
+  const [mode, setMode] = useState<'health' | 'pomodoro'>('health')
+  const [isLongBreak, setIsLongBreak] = useState(false)
+  const [cycle, setCycle] = useState(0)
+  const [cyclesBeforeLongBreak, setCyclesBeforeLongBreak] = useState(4)
   const [visible, setVisible] = useState(false)
 
   // Ejercicio actual
@@ -42,10 +57,15 @@ export default function App(): JSX.Element {
 
   // Escuchar el inicio de la pausa desde main
   useEffect(() => {
-    window.breakAPI.onBreakStart(({ breakSeconds: bs, workMinutes: wm }) => {
-      setBreakSeconds(bs)
-      setRemaining(bs)
-      setWorkMinutes(wm)
+    window.breakAPI.onBreakStart((data) => {
+      setBreakSeconds(data.breakSeconds)
+      setRemaining(data.breakSeconds)
+      setWorkMinutes(data.workMinutes)
+      setSnoozeMinutes(data.snoozeMinutes)
+      setMode(data.mode)
+      setIsLongBreak(data.isLongBreak)
+      setCycle(data.cycle)
+      setCyclesBeforeLongBreak(data.cyclesBeforeLongBreak)
       setExerciseIdx(Math.floor(Math.random() * EXERCISES.length))
       setVisible(true)
     })
@@ -109,9 +129,13 @@ export default function App(): JSX.Element {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <h1 className="title">Pausa Activa</h1>
+              <h1 className="title">{isLongBreak ? 'Descanso largo' : 'Pausa Activa'}</h1>
               <p className="subtitle">
-                {workMinutes} minutos de trabajo — tu cuerpo necesita esto
+                {mode === 'pomodoro'
+                  ? isLongBreak
+                    ? `Completaste ${cyclesBeforeLongBreak} pomodoros — date un respiro más largo`
+                    : `Pomodoro ${cycle}/${cyclesBeforeLongBreak} — ${workMinutes} min de foco`
+                  : `${workMinutes} minutos de trabajo — tu cuerpo necesita esto`}
               </p>
             </motion.div>
 
@@ -204,7 +228,7 @@ export default function App(): JSX.Element {
               transition={{ delay: 0.55 }}
             >
               <button className="btn btn-snooze" onClick={() => window.breakAPI.snooze()}>
-                Posponer 3 min
+                Posponer {snoozeMinutes} min
               </button>
               <button className="btn btn-skip" onClick={() => window.breakAPI.skip()}>
                 Saltar pausa
