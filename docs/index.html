@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pausas Activas — Cuida tu cuerpo mientras trabajas</title>
-  <meta name="description" content="App gratuita para Mac y Windows. Te recuerda pausas activas con ejercicios guiados para que tu cuerpo no pague el precio de largas jornadas frente al computador." />
+  <meta name="description" content="App gratuita para Mac y Windows. Pausas con ejercicios guiados, modo Pomodoro, micro-pausas para la vista, no molestar en reuniones y estadísticas de tu progreso." />
   <style>
     :root {
       --blue: #63b3ed;
@@ -64,7 +64,7 @@
 
     /* ── Hero ── */
     .hero {
-      padding: 96px 0 72px;
+      padding: 96px 0 56px;
       text-align: center;
     }
     .badge {
@@ -91,7 +91,7 @@
     .hero-sub {
       font-size: 18px;
       color: var(--muted);
-      max-width: 480px;
+      max-width: 520px;
       margin: 0 auto 40px;
       line-height: 1.65;
     }
@@ -166,82 +166,145 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
 
-    /* ── Preview mockup ── */
-    .preview {
-      margin: 64px 0;
-      position: relative;
+    /* ── Demo interactiva ── */
+    .demo { padding: 8px 0 72px; }
+    .demo-head { text-align: center; margin-bottom: 28px; }
+    .demo-head h2 {
+      font-size: 28px; font-weight: 700; color: #fff;
+      letter-spacing: -0.5px; margin-bottom: 8px;
     }
-    .preview-window {
-      background: rgba(8, 10, 20, 0.9);
+    .demo-head p { color: var(--muted); font-size: 14px; }
+
+    .demo-tabs {
+      display: flex; justify-content: center; gap: 8px;
+      margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .demo-tab {
+      padding: 9px 18px; border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--muted); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .demo-tab:hover { color: var(--text); }
+    .demo-tab.active {
+      background: rgba(99,179,237,0.14);
+      border-color: rgba(99,179,237,0.3);
+      color: var(--blue);
+    }
+
+    .demo-panel { display: none; }
+    .demo-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* Marco tipo ventana */
+    .win-frame {
+      background: rgba(8, 10, 20, 0.92);
       border: 1px solid var(--border);
       border-radius: 16px;
       overflow: hidden;
-      backdrop-filter: blur(20px);
     }
-    .preview-bar {
+    .win-bar {
       background: rgba(255,255,255,0.04);
       border-bottom: 1px solid var(--border);
       padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
     }
     .window-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .preview-body {
-      padding: 48px 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      text-align: center;
-    }
-    .preview-title { font-size: 28px; font-weight: 700; color: #fff; }
-    .preview-sub { font-size: 14px; color: var(--muted); }
 
-    /* SVG animado en preview */
-    .preview-svg-wrapper {
-      width: 100px; height: 100px;
+    /* Panel: la pausa (overlay) */
+    .break-body {
+      padding: 44px 40px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 18px; text-align: center;
+      background: radial-gradient(circle at 50% 0%, rgba(66,153,225,0.06), transparent 60%);
+    }
+    .break-kicker {
+      font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--blue); opacity: 0.8;
+    }
+    .break-title { font-size: 28px; font-weight: 700; color: #fff; }
+    .break-sub { font-size: 14px; color: var(--muted); min-height: 20px; }
+    .ex-illustration {
+      width: 110px; height: 110px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
+      background: rgba(99,179,237,0.08);
+      border: 1px solid rgba(99,179,237,0.18);
+      font-size: 50px; line-height: 1;
+      animation: floaty 3.5s ease-in-out infinite;
     }
-    .breathe-ring {
-      transform-origin: 50px 50px;
-      animation: breathe 4s ease-in-out infinite;
-    }
-    .breathe-ring:nth-child(2) { animation-delay: 0.3s; }
-    .breathe-ring:nth-child(3) { animation-delay: 0.6s; }
-    @keyframes breathe {
-      0%, 100% { r: 14px; opacity: 0.2; }
-      50% { r: 24px; opacity: 0.55; }
-    }
-    .preview-timer {
-      font-size: 22px; font-weight: 700; color: var(--blue-light);
+    @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .ex-emoji { transition: opacity 0.25s; }
+    .ex-name { font-size: 17px; font-weight: 600; color: var(--blue-light); }
+    .ex-desc { font-size: 13.5px; color: var(--muted); max-width: 320px; min-height: 38px; }
+    .ex-dots { display: flex; gap: 7px; }
+    .ex-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.18); transition: all 0.2s; }
+    .ex-dot.on { background: var(--blue); transform: scale(1.35); }
+    .ex-timer {
+      font-size: 24px; font-weight: 700; color: var(--blue-light);
       letter-spacing: 2px; font-variant-numeric: tabular-nums;
     }
-    .preview-progress-bar {
-      width: 100%; height: 3px;
-      background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;
+    .ex-track { width: 100%; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+    .ex-fill { height: 100%; width: 12%; background: linear-gradient(90deg, #4299e1, #90cdf4); border-radius: 2px; transition: width 1s linear; }
+    .break-btns { display: flex; gap: 10px; margin-top: 4px; }
+    .break-btn { padding: 8px 16px; border-radius: 9px; font-size: 13px; }
+    .break-btn-a { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.78); border: 1px solid rgba(255,255,255,0.12); }
+    .break-btn-b { background: transparent; color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.06); }
+    .try-row { text-align: center; margin-top: 16px; }
+    .try-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 10px; cursor: pointer;
+      background: rgba(99,179,237,0.12); border: 1px solid rgba(99,179,237,0.3);
+      color: var(--blue); font-size: 14px; font-weight: 500;
+      transition: all 0.15s;
     }
-    .preview-progress-fill {
-      height: 100%; width: 35%;
-      background: linear-gradient(90deg, #4299e1, #90cdf4);
-      border-radius: 2px;
-      animation: progress 8s ease-in-out infinite alternate;
+    .try-btn:hover { background: rgba(99,179,237,0.2); }
+
+    /* Panel: menú del tray */
+    .tray-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 8px 0;
     }
-    @keyframes progress { to { width: 80%; } }
-    .preview-btns { display: flex; gap: 10px; }
-    .preview-btn {
-      padding: 8px 16px; border-radius: 9px; font-size: 13px;
+    .tray-menubar {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text);
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 12px;
     }
-    .preview-btn-a {
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.75);
-      border: 1px solid rgba(255,255,255,0.12);
+    .tray-menubar .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+    .tray-menu {
+      width: 300px; max-width: 100%;
+      background: rgba(28, 30, 40, 0.96);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 6px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+      font-size: 13px;
     }
-    .preview-btn-b {
-      background: transparent;
-      color: rgba(255,255,255,0.3);
-      border: 1px solid rgba(255,255,255,0.06);
+    .tm-item { padding: 6px 10px; border-radius: 7px; color: var(--text); display: flex; justify-content: space-between; gap: 10px; }
+    .tm-item.muted { color: var(--muted); font-size: 12px; }
+    .tm-item.sub::after { content: '▸'; color: var(--muted); }
+    .tm-item.hl { background: rgba(99,179,237,0.18); color: var(--blue-light); }
+    .tm-item.check::before { content: '✓ '; color: var(--blue); }
+    .tm-sep { height: 1px; background: rgba(255,255,255,0.08); margin: 5px 8px; }
+    .tm-ver { color: var(--muted); font-size: 11px; }
+
+    /* Panel: estadísticas */
+    .stats-mock { padding: 26px 28px; }
+    .scards { display: flex; gap: 12px; margin-bottom: 22px; }
+    .scard {
+      flex: 1; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;
     }
+    .snum { font-size: 28px; font-weight: 700; color: var(--blue-light); font-variant-numeric: tabular-nums; }
+    .scap { font-size: 12px; color: var(--muted); }
+    .schart-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .schart { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; height: 140px; }
+    .sbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; }
+    .sbar-track { flex: 1; width: 60%; display: flex; align-items: flex-end; background: rgba(255,255,255,0.04); border-radius: 6px; overflow: hidden; }
+    .sbar-fill { width: 100%; height: 0; background: linear-gradient(180deg, #90cdf4, #4299e1); border-radius: 6px 6px 0 0; transition: height 0.6s ease; }
+    .sbar-count { font-size: 12px; color: var(--blue-light); height: 14px; }
+    .sbar-day { font-size: 11px; color: var(--muted); }
 
     /* ── Features ── */
     .features { padding: 16px 0 80px; }
@@ -268,12 +331,8 @@
     .how { padding: 0 0 80px; text-align: center; }
     .how h2 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 36px; }
     .steps {
-      display: flex;
-      gap: 0;
-      align-items: flex-start;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
+      display: flex; align-items: flex-start; justify-content: center;
+      flex-wrap: wrap; gap: 8px;
     }
     .step {
       flex: 1; min-width: 160px; max-width: 200px;
@@ -299,6 +358,28 @@
       color: var(--muted);
     }
     footer a { color: var(--muted); }
+
+    /* ── Overlay a pantalla completa (demo) ── */
+    .fs-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(8, 10, 20, 0.86);
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+    }
+    .fs-overlay.show { display: flex; animation: fadeIn 0.35s ease; }
+    .fs-content {
+      display: flex; flex-direction: column; align-items: center; gap: 22px;
+      text-align: center; padding: 0 24px; max-width: 480px;
+    }
+    .fs-content .break-title { font-size: 34px; }
+    .fs-content .ex-illustration { width: 130px; height: 130px; font-size: 60px; }
+    .fs-close {
+      position: absolute; top: 22px; right: 26px;
+      background: none; border: none; color: rgba(255,255,255,0.5);
+      font-size: 28px; cursor: pointer; line-height: 1;
+    }
+    .fs-close:hover { color: #fff; }
+    .fs-hint { position: absolute; bottom: 26px; font-size: 12px; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -310,8 +391,9 @@
       Pausas Activas
     </div>
     <div class="nav-links">
-      <a href="https://github.com/hnpz22/pausas-activas/releases">Descargas</a>
-      <a href="https://github.com/hnpz22/pausas-activas">GitHub</a>
+      <a href="#demo">Demo</a>
+      <a href="https://github.com/hnpz22/Pausas-Activas/releases">Descargas</a>
+      <a href="https://github.com/hnpz22/Pausas-Activas">GitHub</a>
     </div>
   </div>
 </nav>
@@ -321,16 +403,17 @@
 
     <!-- Hero -->
     <section class="hero">
-      <div class="badge">Gratis · Mac y Windows · Sin instalación de dependencias</div>
+      <div class="badge">Gratis · Mac y Windows · Pomodoro · Estadísticas</div>
       <h1>Tu cuerpo también<br><span>merece descanso</span></h1>
       <p class="hero-sub">
-        Pausas Activas vive en tu barra de menú y te recuerda
-        tomar pausas con ejercicios guiados antes de que el cuerpo lo reclame.
+        Vive en tu barra de menú y te recuerda parar con ejercicios guiados.
+        Con modo Pomodoro, descansos para la vista, no molestar en reuniones
+        y estadísticas de tu progreso.
       </p>
 
       <div class="downloads">
         <a class="btn-download btn-mac"
-           href="https://github.com/hnpz22/pausas-activas/releases/latest/download/Pausas-Activas-universal.dmg">
+           href="https://github.com/hnpz22/Pausas-Activas/releases/latest/download/Pausas-Activas-universal.dmg">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
           </svg>
@@ -341,7 +424,7 @@
         </a>
 
         <a class="btn-download btn-win"
-           href="https://github.com/hnpz22/pausas-activas/releases/latest/download/Pausas-Activas-win-x64.exe">
+           href="https://github.com/hnpz22/Pausas-Activas/releases/latest/download/Pausas-Activas-win-x64.exe">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M3 5.557L9.938 4.6v6.744H3zm0 12.886l6.938.956V12.68H3zm7.607 1.072L21 21V12.68h-10.393zm0-15.03V11.32H21V3z"/>
           </svg>
@@ -358,6 +441,103 @@
       <p class="download-help">
         ¿El sistema la bloquea la primera vez? → <a href="#instalar">Cómo abrirla</a>
       </p>
+    </section>
+
+    <!-- Demo interactiva -->
+    <section id="demo" class="demo">
+      <div class="demo-head">
+        <h2>Pruébala sin instalar nada</h2>
+        <p>Una mini demostración de cómo se ve y se siente la app.</p>
+      </div>
+
+      <div class="demo-tabs">
+        <button class="demo-tab active" data-target="panel-break">🧘 La pausa</button>
+        <button class="demo-tab" data-target="panel-tray">📋 El menú</button>
+        <button class="demo-tab" data-target="panel-stats">📊 Estadísticas</button>
+      </div>
+
+      <!-- Panel: la pausa -->
+      <div id="panel-break" class="demo-panel active">
+        <div class="win-frame">
+          <div class="win-bar">
+            <div class="window-dot" style="background:#ff5f56"></div>
+            <div class="window-dot" style="background:#ffbd2e"></div>
+            <div class="window-dot" style="background:#27c93f"></div>
+          </div>
+          <div class="break-body ex-stage">
+            <div class="break-kicker">Pomodoro 2/4 · 25 min de foco</div>
+            <div class="break-title">Pausa Activa</div>
+            <div class="break-sub">Tu cuerpo necesita esto — relájate un momento</div>
+            <div class="ex-illustration"><span class="ex-emoji">🧘</span></div>
+            <div class="ex-name">Respiración</div>
+            <div class="ex-desc">Inhala 4 segundos, exhala 4 segundos. Suelta los hombros.</div>
+            <div class="ex-dots">
+              <div class="ex-dot on"></div><div class="ex-dot"></div><div class="ex-dot"></div>
+              <div class="ex-dot"></div><div class="ex-dot"></div><div class="ex-dot"></div>
+            </div>
+            <div class="ex-timer">4:42</div>
+            <div class="ex-track"><div class="ex-fill"></div></div>
+            <div class="break-btns">
+              <div class="break-btn break-btn-a">Posponer 3 min</div>
+              <div class="break-btn break-btn-b">Saltar pausa</div>
+            </div>
+          </div>
+        </div>
+        <div class="try-row">
+          <button id="try-btn" class="try-btn">▶ Probar a pantalla completa</button>
+        </div>
+      </div>
+
+      <!-- Panel: menú del tray -->
+      <div id="panel-tray" class="demo-panel">
+        <div class="tray-wrap">
+          <div class="tray-menubar"><span class="dot"></span> 18m · Pausas Activas</div>
+          <div class="tray-menu">
+            <div class="tm-item muted"><span>Hoy: 3 ✓ · 1 saltada</span></div>
+            <div class="tm-item muted"><span>Racha: 5 días 🔥</span></div>
+            <div class="tm-item">Ver estadísticas…</div>
+            <div class="tm-sep"></div>
+            <div class="tm-item sub">Modo</div>
+            <div class="tm-item muted"><span>Pomodoro: 25 min · ciclo 2/4</span></div>
+            <div class="tm-item muted"><span>Pausa: 5 min</span></div>
+            <div class="tm-sep"></div>
+            <div class="tm-item">Iniciar pausa ahora</div>
+            <div class="tm-item">Resetear timer</div>
+            <div class="tm-sep"></div>
+            <div class="tm-item sub">No molestar</div>
+            <div class="tm-item check">Posponer pausa en reuniones</div>
+            <div class="tm-sep"></div>
+            <div class="tm-item sub">Recordatorios</div>
+            <div class="tm-item sub">Duración del foco</div>
+            <div class="tm-item sub">Descanso largo</div>
+            <div class="tm-sep"></div>
+            <div class="tm-item check">Abrir al iniciar el computador</div>
+            <div class="tm-sep"></div>
+            <div class="tm-item tm-ver">Pausas Activas v1.0.10</div>
+            <div class="tm-item">Salir</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: estadísticas -->
+      <div id="panel-stats" class="demo-panel">
+        <div class="win-frame">
+          <div class="win-bar">
+            <div class="window-dot" style="background:#ff5f56"></div>
+            <div class="window-dot" style="background:#ffbd2e"></div>
+            <div class="window-dot" style="background:#27c93f"></div>
+          </div>
+          <div class="stats-mock">
+            <div class="scards">
+              <div class="scard"><span class="snum">3</span><span class="scap">hoy</span></div>
+              <div class="scard"><span class="snum">5 🔥</span><span class="scap">racha (días)</span></div>
+              <div class="scard"><span class="snum">128</span><span class="scap">total</span></div>
+            </div>
+            <div class="schart-label">Últimos 7 días</div>
+            <div class="schart" id="schart"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Primer arranque -->
@@ -380,9 +560,8 @@
               </li>
               <li>Volvé a abrir la app — ya queda autorizada para siempre.</li>
               <li>
-                Alternativa sin Terminal:
-                <strong>Ajustes → Privacidad y seguridad</strong>, bajá hasta el aviso y
-                tocá <strong>Abrir de todos modos</strong>.
+                La primera vez, <strong>acepta el permiso de notificaciones</strong>
+                (lo usa para los avisos previos y para avisarte de nuevas versiones).
               </li>
             </ol>
           </div>
@@ -398,44 +577,34 @@
       </div>
     </section>
 
-    <!-- Preview -->
-    <div class="preview">
-      <div class="preview-window">
-        <div class="preview-bar">
-          <div class="window-dot" style="background:#ff5f56"></div>
-          <div class="window-dot" style="background:#ffbd2e"></div>
-          <div class="window-dot" style="background:#27c93f"></div>
-        </div>
-        <div class="preview-body">
-          <div class="preview-title">Pausa Activa</div>
-          <div class="preview-sub">25 minutos de trabajo — tu cuerpo necesita esto</div>
-          <div class="preview-svg-wrapper">
-            <svg viewBox="0 0 100 100" width="100" height="100" fill="none">
-              <circle class="breathe-ring" cx="50" cy="50" stroke="#63b3ed" stroke-width="1.5"/>
-              <circle class="breathe-ring" cx="50" cy="50" stroke="#63b3ed" stroke-width="2"/>
-              <circle class="breathe-ring" cx="50" cy="50" stroke="#63b3ed" stroke-width="2.5" r="12"/>
-            </svg>
-          </div>
-          <div class="preview-timer">4:30</div>
-          <div class="preview-progress-bar">
-            <div class="preview-progress-fill"></div>
-          </div>
-          <div class="preview-btns">
-            <div class="preview-btn preview-btn-a">Posponer 3 min</div>
-            <div class="preview-btn preview-btn-b">Saltar pausa</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Features -->
     <section class="features">
-      <h2>Todo lo que necesitas</h2>
+      <h2>Todo lo que hace</h2>
       <div class="feature-grid">
         <div class="feature-card">
-          <div class="feature-icon">🧠</div>
-          <div class="feature-title">Corre local</div>
-          <div class="feature-desc">No necesita internet. No hay servidor. No hay suscripción. Todo en tu computador.</div>
+          <div class="feature-icon">🤸</div>
+          <div class="feature-title">6 ejercicios guiados</div>
+          <div class="feature-desc">Cuello, ojos, hombros, muñecas, levantarse y respiración — animados en pantalla.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🍅</div>
+          <div class="feature-title">Modo Pomodoro</div>
+          <div class="feature-desc">Ciclos de foco con descanso largo cada 4 pomodoros. O modo salud por tiempo activo real.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👀</div>
+          <div class="feature-title">Micro-pausas 20-20-20</div>
+          <div class="feature-desc">Recordatorio para descansar la vista cada 20 min, e hidratación cada hora.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎥</div>
+          <div class="feature-title">No molesta en reuniones</div>
+          <div class="feature-desc">Detecta cuando estás en una videollamada y pospone la pausa en vez de taparla. También hay modo manual.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Estadísticas y racha</div>
+          <div class="feature-desc">Cuenta tus pausas, lleva tu racha de días y muestra un gráfico de la última semana.</div>
         </div>
         <div class="feature-card">
           <div class="feature-icon">⏰</div>
@@ -443,24 +612,19 @@
           <div class="feature-desc">Te notifica 5, 2 y 1 minuto antes — nunca te corta el flujo sin avisar.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🤸</div>
-          <div class="feature-title">6 ejercicios guiados</div>
-          <div class="feature-desc">Cuello, ojos, hombros, muñecas, espalda y respiración — animados en pantalla.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔋</div>
-          <div class="feature-title">Ultra liviana</div>
-          <div class="feature-desc">Funciona en computadores con i3 y 8GB RAM sin interferir con tu trabajo.</div>
-        </div>
-        <div class="feature-card">
           <div class="feature-icon">⚙️</div>
           <div class="feature-title">Configurable</div>
-          <div class="feature-desc">Ajusta el intervalo de trabajo (15–50 min) y la duración de la pausa desde el tray.</div>
+          <div class="feature-desc">Ajusta intervalos, duración de pausa, descanso largo y recordatorios desde el tray.</div>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔄</div>
-          <div class="feature-title">Se actualiza solo</div>
-          <div class="feature-desc">Cuando hay una nueva versión, la descarga en segundo plano y te pregunta si instalar.</div>
+          <div class="feature-title">Te avisa de updates</div>
+          <div class="feature-desc">Cuando hay una versión nueva, te muestra un aviso y con un clic te lleva a descargarla.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔋</div>
+          <div class="feature-title">Local y liviana</div>
+          <div class="feature-desc">Sin internet, sin servidor, sin cuenta. Corre en un i3 con 8GB sin estorbar.</div>
         </div>
       </div>
     </section>
@@ -475,15 +639,15 @@
         </div>
         <div class="step">
           <div class="step-num">2</div>
-          <div class="step-text">La app vive en tu barra de menú, contando el tiempo activo.</div>
+          <div class="step-text">Vive en tu barra de menú contando el tiempo activo.</div>
         </div>
         <div class="step">
           <div class="step-num">3</div>
-          <div class="step-text">A los 25 min, te avisa — primero suave, luego el overlay.</div>
+          <div class="step-text">Cuando toca, te avisa — primero suave, luego el overlay.</div>
         </div>
         <div class="step">
           <div class="step-num">4</div>
-          <div class="step-text">Haces el ejercicio del día. 5 minutos. Vuelves fresco.</div>
+          <div class="step-text">Haces el ejercicio del día. Unos minutos. Vuelves fresco.</div>
         </div>
       </div>
     </section>
@@ -494,9 +658,138 @@
 <footer>
   <div class="container">
     Hecho con Electron · Gratis y open source ·
-    <a href="https://github.com/hnpz22/pausas-activas">Ver el código en GitHub</a>
+    <a href="https://github.com/hnpz22/Pausas-Activas">Ver el código en GitHub</a>
   </div>
 </footer>
+
+<!-- Overlay a pantalla completa (demo) -->
+<div id="fs-overlay" class="fs-overlay">
+  <button id="fs-close" class="fs-close" aria-label="Cerrar">×</button>
+  <div class="fs-content ex-stage">
+    <div class="break-kicker">Pomodoro 2/4 · 25 min de foco</div>
+    <div class="break-title">Pausa Activa</div>
+    <div class="break-sub">Tu cuerpo necesita esto — relájate un momento</div>
+    <div class="ex-illustration"><span class="ex-emoji">🧘</span></div>
+    <div class="ex-name">Respiración</div>
+    <div class="ex-desc">Inhala 4 segundos, exhala 4 segundos. Suelta los hombros.</div>
+    <div class="ex-dots">
+      <div class="ex-dot on"></div><div class="ex-dot"></div><div class="ex-dot"></div>
+      <div class="ex-dot"></div><div class="ex-dot"></div><div class="ex-dot"></div>
+    </div>
+    <div class="ex-timer">4:42</div>
+    <div class="ex-track" style="max-width:320px"><div class="ex-fill"></div></div>
+    <div class="break-btns">
+      <div class="break-btn break-btn-a">Posponer 3 min</div>
+      <div class="break-btn break-btn-b">Saltar pausa</div>
+    </div>
+  </div>
+  <div class="fs-hint">Demo · presiona × o Esc para cerrar</div>
+</div>
+
+<script>
+  (function () {
+    var EXERCISES = [
+      { emoji: '🧘', name: 'Respiración', desc: 'Inhala 4 segundos, exhala 4 segundos. Suelta los hombros.' },
+      { emoji: '👀', name: 'Descanso visual', desc: 'Mira algo a unos 6 metros durante 20 segundos.' },
+      { emoji: '🙆', name: 'Cuello', desc: 'Inclina la cabeza a cada lado, lento y suave.' },
+      { emoji: '💪', name: 'Hombros', desc: 'Rota los hombros hacia atrás unas 10 veces.' },
+      { emoji: '🤲', name: 'Muñecas', desc: 'Estira y gira las muñecas en círculos.' },
+      { emoji: '🧍', name: 'Levántate', desc: 'Ponte de pie y estira todo el cuerpo.' }
+    ];
+    var TOTAL = 300; // 5 min de pausa (demo)
+    var exIdx = 0;
+    var secs = 282;
+
+    function fmt(s) {
+      var m = Math.floor(s / 60);
+      var r = s % 60;
+      return m + ':' + (r < 10 ? '0' : '') + r;
+    }
+
+    function paintStages() {
+      var stages = document.querySelectorAll('.ex-stage');
+      var e = EXERCISES[exIdx];
+      for (var i = 0; i < stages.length; i++) {
+        var root = stages[i];
+        var emoji = root.querySelector('.ex-emoji');
+        if (emoji) emoji.textContent = e.emoji;
+        var name = root.querySelector('.ex-name');
+        if (name) name.textContent = e.name;
+        var desc = root.querySelector('.ex-desc');
+        if (desc) desc.textContent = e.desc;
+        var dots = root.querySelectorAll('.ex-dot');
+        for (var d = 0; d < dots.length; d++) {
+          dots[d].className = 'ex-dot' + (d === exIdx ? ' on' : '');
+        }
+        var timer = root.querySelector('.ex-timer');
+        if (timer) timer.textContent = fmt(secs);
+        var fill = root.querySelector('.ex-fill');
+        if (fill) fill.style.width = ((1 - secs / TOTAL) * 100).toFixed(1) + '%';
+      }
+    }
+
+    // Cuenta regresiva (loop)
+    setInterval(function () {
+      secs = secs > 1 ? secs - 1 : TOTAL;
+      paintStages();
+    }, 1000);
+
+    // Rotar ejercicio
+    setInterval(function () {
+      exIdx = (exIdx + 1) % EXERCISES.length;
+      paintStages();
+    }, 3200);
+
+    // Pestañas
+    var tabs = document.querySelectorAll('.demo-tab');
+    for (var t = 0; t < tabs.length; t++) {
+      tabs[t].addEventListener('click', function () {
+        var all = document.querySelectorAll('.demo-tab');
+        for (var a = 0; a < all.length; a++) all[a].classList.remove('active');
+        var panels = document.querySelectorAll('.demo-panel');
+        for (var p = 0; p < panels.length; p++) panels[p].classList.remove('active');
+        this.classList.add('active');
+        var target = document.getElementById(this.getAttribute('data-target'));
+        if (target) target.classList.add('active');
+        if (this.getAttribute('data-target') === 'panel-stats') buildBars();
+      });
+    }
+
+    // Gráfico de barras (estadísticas)
+    var DAYS = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'hoy'];
+    var COUNTS = [5, 7, 4, 8, 6, 4, 3];
+    function buildBars() {
+      var chart = document.getElementById('schart');
+      if (!chart) return;
+      chart.innerHTML = '';
+      var max = Math.max.apply(null, COUNTS);
+      for (var i = 0; i < DAYS.length; i++) {
+        var col = document.createElement('div');
+        col.className = 'sbar-col';
+        col.innerHTML =
+          '<div class="sbar-track"><div class="sbar-fill"></div></div>' +
+          '<div class="sbar-count">' + COUNTS[i] + '</div>' +
+          '<div class="sbar-day">' + DAYS[i] + '</div>';
+        chart.appendChild(col);
+        (function (fill, pct) {
+          setTimeout(function () { fill.style.height = pct + '%'; }, 60);
+        })(col.querySelector('.sbar-fill'), (COUNTS[i] / max) * 100);
+      }
+    }
+
+    // Overlay a pantalla completa
+    var tryBtn = document.getElementById('try-btn');
+    var fsOverlay = document.getElementById('fs-overlay');
+    var fsClose = document.getElementById('fs-close');
+    if (tryBtn) tryBtn.addEventListener('click', function () { fsOverlay.classList.add('show'); });
+    if (fsClose) fsClose.addEventListener('click', function () { fsOverlay.classList.remove('show'); });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape') fsOverlay.classList.remove('show');
+    });
+
+    paintStages();
+  })();
+</script>
 
 </body>
 </html>
