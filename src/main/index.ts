@@ -600,6 +600,7 @@ function buildTrayMenu(): Menu {
       }
     },
     { type: 'separator' },
+    { label: `Pausas Activas v${app.getVersion()}`, enabled: false },
     { label: 'Salir', click: () => app.quit() }
   ])
 }
