@@ -13,14 +13,19 @@ module.exports = {
     category: 'public.app-category.productivity',
     target: [
       { target: 'dmg', arch: ['universal'] }
-    ]
+    ],
+    // Nombre fijo para que coincida con el enlace de descarga en docs/index.html
+    // (la URL .../releases/latest/download/<nombre> exige el nombre exacto)
+    artifactName: 'Pausas-Activas-universal.${ext}'
   },
 
   // Windows: x64 cubre i3, i5, Ryzen, etc.
   win: {
     target: [
       { target: 'nsis', arch: ['x64'] }
-    ]
+    ],
+    // Nombre fijo para que coincida con el botón "Descargar para Windows"
+    artifactName: 'Pausas-Activas-win-x64.${ext}'
   },
 
   // Auto-update via GitHub Releases (gratis)
