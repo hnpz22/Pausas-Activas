@@ -13,6 +13,7 @@ import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { setupAutoUpdater } from './updater'
+import trayIcon from '../../resources/tray.png?asset'
 
 // ─── Settings ────────────────────────────────────────────────────────────────
 
@@ -203,23 +204,24 @@ function startActivityTimer(): void {
 function updateTray(): void {
   if (!tray) return
 
+  let label: string
   if (onBreak) {
-    tray.setTitle(' Pausa')
-    return
-  }
-
-  if (snoozedUntil > Date.now()) {
+    label = 'Pausa'
+  } else if (snoozedUntil > Date.now()) {
     const left = Math.ceil((snoozedUntil - Date.now()) / 60000)
-    tray.setTitle(` ~${left}m`)
-    return
+    label = `~${left}m`
+  } else {
+    const remaining = settings.workMinutes * 60 - activeSeconds
+    const minutesLeft = Math.max(0, Math.ceil(remaining / 60))
+    // Cambia el indicador cuando quedan pocos minutos
+    const warningZone = is.dev ? remaining <= 30 : remaining <= 5 * 60
+    label = warningZone ? `!! ${minutesLeft}m` : `${minutesLeft}m`
   }
 
-  const remaining = settings.workMinutes * 60 - activeSeconds
-  const minutesLeft = Math.max(0, Math.ceil(remaining / 60))
-
-  // Cambia el indicador cuando quedan pocos minutos
-  const warningZone = is.dev ? remaining <= 30 : remaining <= 5 * 60
-  tray.setTitle(warningZone ? ` !! ${minutesLeft}m` : ` ${minutesLeft}m`)
+  // macOS: el texto se ve junto al ícono en la barra de menú
+  tray.setTitle(` ${label}`)
+  // Windows: no hay texto en la bandeja, así que el contador va en el tooltip (hover)
+  tray.setToolTip(`Pausas Activas — ${label}`)
 }
 
 function buildTrayMenu(): Menu {
@@ -287,16 +289,17 @@ function buildTrayMenu(): Menu {
 app.whenReady().then(() => {
   if (process.platform === 'darwin') app.dock.hide()
 
-  // macOS: ícono vacío + título de texto en la barra de menú
-  // Windows: necesita un PNG real para el system tray
-  const iconPath = join(__dirname, '../../resources/icon.png')
-  const icon = process.platform === 'darwin'
-    ? nativeImage.createEmpty()
-    : nativeImage.createFromPath(iconPath)
+  // Círculo azul como ícono del tray en ambos sistemas.
+  // El import `?asset` empaqueta tray.png y devuelve una ruta válida en dev y prod
+  // (antes apuntaba a resources/, que no se incluye en el build → ícono vacío en Windows).
+  const trayImg = nativeImage.createFromPath(trayIcon)
+  const icon =
+    process.platform === 'darwin'
+      ? trayImg.resize({ width: 16, height: 16 }) // tamaño de la barra de menú
+      : trayImg
 
   tray = new Tray(icon)
   tray.setContextMenu(buildTrayMenu())
-  tray.setToolTip('Pausas Activas')
 
   updateTray()
   startActivityTimer()

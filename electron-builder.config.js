@@ -6,7 +6,11 @@ module.exports = {
     buildResources: 'resources',
     output: 'dist'
   },
-  files: ['out/**/*'],
+  // `out/**` = código compilado. `resources/**` = assets que el main carga en runtime
+  // (tray.png): el import `?asset` los referencia como `../../resources/...`, así que
+  // deben viajar dentro del paquete o el ícono del tray sale vacío en producción.
+  files: ['out/**/*', 'resources/**'],
+  asarUnpack: ['resources/**'],
 
   // macOS: un solo .dmg que corre en arm64 (M1/M2/M3/M4) e Intel
   mac: {

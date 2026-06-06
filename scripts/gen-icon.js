@@ -103,21 +103,31 @@ for (let x = 0; x < src.width; x++) {
   if (px(x, Math.floor(cy))[3] > 128) { if (x < minX) minX = x; if (x > maxX) maxX = x }
 }
 const srcRadius = (maxX - minX + 1) / 2
-const radius = (srcRadius / src.width) * SIZE
-console.log(`color=rgb(${R},${G},${B}) radio_fuente=${srcRadius}px radio_dst=${radius.toFixed(1)}px`)
+const ratio = srcRadius / src.width // proporción radio/lado del icono original (~0.94)
+console.log(`color=rgb(${R},${G},${B}) ratio=${ratio.toFixed(3)}`)
 
-// ── 2) dibujar círculo anti-aliased a 1024 ────────────────────────────────
-const out = Buffer.alloc(SIZE * SIZE * 4)
-const ccx = SIZE / 2 - 0.5, ccy = SIZE / 2 - 0.5
-for (let y = 0; y < SIZE; y++) {
-  for (let x = 0; x < SIZE; x++) {
-    const d = Math.hypot(x - ccx, y - ccy)
-    // cobertura: 1 dentro, 0 fuera, transición de 1px en el borde
-    let cov = radius + 0.5 - d
-    cov = cov < 0 ? 0 : cov > 1 ? 1 : cov
-    const i = (y * SIZE + x) * 4
-    out[i] = R; out[i + 1] = G; out[i + 2] = B; out[i + 3] = Math.round(cov * 255)
+// ── 2) dibujar un círculo anti-aliased a cualquier tamaño ──────────────────
+function circlePng(size, fillRatio) {
+  const out = Buffer.alloc(size * size * 4)
+  const c = size / 2 - 0.5
+  const radius = fillRatio * size
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const d = Math.hypot(x - c, y - c)
+      let cov = radius + 0.5 - d // 1 dentro, 0 fuera, transición de 1px en el borde
+      cov = cov < 0 ? 0 : cov > 1 ? 1 : cov
+      const i = (y * size + x) * 4
+      out[i] = R; out[i + 1] = G; out[i + 2] = B; out[i + 3] = Math.round(cov * 255)
+    }
   }
+  return encodePng(size, size, out)
 }
-fs.writeFileSync(SRC, encodePng(SIZE, SIZE, out))
-console.log('escrito', SRC)
+
+// Icono de la app (Finder / dock / .exe / instalador): 1024×1024, mismo margen que el original
+fs.writeFileSync(SRC, circlePng(SIZE, ratio))
+console.log('escrito', SRC, `(${SIZE}px)`)
+
+// Icono del tray (barra de menú macOS / bandeja Windows): 32×32, casi lleno para que se vea
+const TRAY = path.join(__dirname, '..', 'resources', 'tray.png')
+fs.writeFileSync(TRAY, circlePng(32, 0.46))
+console.log('escrito', TRAY, '(32px)')
