@@ -29,11 +29,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Upload .dmg to release
+      # Sube el instalador Y el feed de update (latest-mac.yml). Ese .yml es lo que
+      # electron-updater lee para detectar versiones nuevas: sin él no hay aviso.
+      - name: Upload Mac artifacts to release
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: dist/*.dmg
+          files: |
+            dist/*.dmg
+            dist/*.blockmap
+            dist/latest-mac.yml
           generate_release_notes: true
           fail_on_unmatched_files: false
 
@@ -55,9 +60,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload .exe to release
+      # Sube el instalador Y el feed de update (latest.yml). Sin latest.yml los
+      # usuarios de Windows nunca reciben el aviso de actualización (era el bug de v1.0.6).
+      - name: Upload Windows artifacts to release
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: dist/*.exe
+          files: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest.yml
           fail_on_unmatched_files: false
