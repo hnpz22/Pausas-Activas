@@ -15,6 +15,7 @@ import { is } from '@electron-toolkit/utils'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { setupAutoUpdater, LANDING_URL } from './updater'
 import { recordCompleted, recordSkipped, recordSnoozed, summary, todayStat, currentStreak } from './stats'
+import { isInMeeting } from './meeting'
 import trayIcon from '../../resources/tray.png?asset'
 
 // ─── Settings ────────────────────────────────────────────────────────────────
@@ -30,6 +31,7 @@ interface Settings {
   cyclesBeforeLongBreak: number // cada cuántos pomodoros toca el descanso largo
   eyeReminder: boolean // recordatorio 20-20-20
   hydrationReminder: boolean // recordatorio de hidratación
+  autoDndInMeetings: boolean // posponer la pausa si detecta una reunión/videollamada
 }
 
 const DEFAULTS: Settings = {
@@ -40,7 +42,8 @@ const DEFAULTS: Settings = {
   longBreakMinutes: 15,
   cyclesBeforeLongBreak: 4,
   eyeReminder: true,
-  hydrationReminder: false
+  hydrationReminder: false,
+  autoDndInMeetings: true
 }
 
 const DEV_WORK_MINUTES = 1
@@ -80,6 +83,8 @@ let activeSeconds = 0
 let onBreak = false
 let snoozedUntil = 0
 let dndUntil = 0 // "No molestar": pausa todo hasta este timestamp (manual)
+let meetingUntil = 0 // pausa pospuesta automáticamente por reunión detectada (re-chequea al expirar)
+let checkingMeeting = false // evita consultas solapadas a la ventana en foco
 let pomodoroCount = 0 // bloques de foco completados (para la cadencia del descanso largo)
 let isLongBreakNow = false
 
@@ -96,6 +101,9 @@ const IDLE_THRESHOLD_S = 5 * 60
 
 const EYE_INTERVAL_S = is.dev ? 40 : 20 * 60 // regla 20-20-20
 const HYDRATION_INTERVAL_S = is.dev ? 80 : 60 * 60
+
+// Si detectamos reunión al ir a saltar la pausa, posponemos este lapso y re-chequeamos
+const MEETING_RECHECK_MS = is.dev ? 15_000 : 3 * 60 * 1000
 
 // ─── No molestar (manual) ─────────────────────────────────────────────────────
 
@@ -300,10 +308,33 @@ function setMode(mode: Mode): void {
   tray?.setContextMenu(buildTrayMenu())
 }
 
+// Justo antes de interrumpir: si está activado y detectamos una reunión, posponemos
+// la pausa unos minutos y la re-chequeamos al expirar (en vez de tapar la videollamada).
+async function maybeTriggerBreak(): Promise<void> {
+  if (settings.autoDndInMeetings && !checkingMeeting) {
+    checkingMeeting = true
+    let inMeeting = false
+    try {
+      inMeeting = await isInMeeting()
+    } catch {
+      inMeeting = false // falla seguro: si no podemos saber, dejamos pasar la pausa
+    }
+    checkingMeeting = false
+
+    if (inMeeting) {
+      meetingUntil = Date.now() + MEETING_RECHECK_MS
+      updateTray()
+      return
+    }
+  }
+  triggerBreak()
+}
+
 function startActivityTimer(): void {
   setInterval(() => {
     if (onBreak) return
-    if (dndActive()) { updateTray(); return } // No molestar: pausa todo
+    if (dndActive()) { updateTray(); return } // No molestar manual: pausa todo
+    if (meetingUntil > Date.now()) { updateTray(); return } // pospuesto por reunión
     if (snoozedUntil > Date.now()) return
 
     const idleSecs = powerMonitor.getSystemIdleTime()
@@ -342,7 +373,7 @@ function startActivityTimer(): void {
     updateTray()
 
     if (activeSeconds >= settings.workMinutes * 60) {
-      triggerBreak()
+      void maybeTriggerBreak()
     }
   }, CHECK_INTERVAL_MS)
 }
@@ -355,6 +386,8 @@ function updateTray(): void {
   let label: string
   if (dndActive()) {
     label = '🌙'
+  } else if (meetingUntil > Date.now()) {
+    label = '🎥'
   } else if (onBreak) {
     label = isLongBreakNow ? 'Descanso' : 'Pausa'
   } else if (snoozedUntil > Date.now()) {
@@ -429,6 +462,7 @@ function buildTrayMenu(): Menu {
       click: () => {
         activeSeconds = 0
         snoozedUntil = 0
+        meetingUntil = 0
         resetWarnings()
         updateTray()
       }
@@ -454,6 +488,16 @@ function buildTrayMenu(): Menu {
             ]
           }
         ]),
+    {
+      label: 'Posponer pausa en reuniones',
+      type: 'checkbox' as const,
+      checked: settings.autoDndInMeetings,
+      click: (item) => {
+        settings.autoDndInMeetings = item.checked
+        if (!item.checked) meetingUntil = 0 // al apagarlo, no dejar una pausa colgada
+        saveSettings(settings)
+      }
+    },
     { type: 'separator' },
 
     // ── Ajustes de duración ──

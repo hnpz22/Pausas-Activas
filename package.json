@@ -1,6 +1,6 @@
 {
   "name": "pausas-activas",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Monitor de pausas activas para la oficina",
   "main": "out/main/index.js",
   "scripts": {
