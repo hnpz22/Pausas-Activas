@@ -7,12 +7,13 @@ import {
   nativeImage,
   ipcMain,
   powerMonitor,
-  screen
+  screen,
+  shell
 } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
-import { setupAutoUpdater } from './updater'
+import { setupAutoUpdater, LANDING_URL } from './updater'
 import trayIcon from '../../resources/tray.png?asset'
 
 // ─── Settings ────────────────────────────────────────────────────────────────
@@ -50,6 +51,7 @@ function saveSettings(s: Settings): void {
 let tray: Tray | null = null
 let breakWindow: BrowserWindow | null = null
 let settings = loadSettings()
+let availableUpdate: string | null = null // versión nueva detectada (sin firma → solo avisamos)
 
 if (is.dev) {
   settings.workMinutes = DEV_WORK_MINUTES
@@ -226,6 +228,16 @@ function updateTray(): void {
 
 function buildTrayMenu(): Menu {
   return Menu.buildFromTemplate([
+    // Aviso de actualización (solo aparece cuando hay una versión nueva)
+    ...(availableUpdate
+      ? [
+          {
+            label: `⬇️  Descargar v${availableUpdate}`,
+            click: () => shell.openExternal(LANDING_URL)
+          },
+          { type: 'separator' as const }
+        ]
+      : []),
     { label: `Trabajo: ${settings.workMinutes} min`, enabled: false },
     { label: `Pausa: ${settings.breakMinutes} min`, enabled: false },
     { type: 'separator' },
@@ -303,7 +315,10 @@ app.whenReady().then(() => {
 
   updateTray()
   startActivityTimer()
-  setupAutoUpdater()
+  setupAutoUpdater((version) => {
+    availableUpdate = version
+    tray?.setContextMenu(buildTrayMenu())
+  })
 
   ipcMain.on('break:complete', () => endBreak())
   ipcMain.on('break:skip', () => endBreak())
